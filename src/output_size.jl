@@ -2,7 +2,7 @@ using Flux, Plots, Statistics, MLDatasets, Images, TimeSeries, CSV, DataFrames
 
 data = CSV.read("BAJAJFINSV.csv", DataFrame)
 
-output_size = 1;
+output_size = parse(Int, ARGS[1])
 
 # Keep only the close price, and convert the datatype to Float32,
 # Float32 is NECESSARY for recurrent models in Flux
@@ -35,5 +35,8 @@ end
 
 # Reshape result from Flux data format to Julia standard
 Prediction = [model(x)[1] for x ∈ X]
-
-plot(data.Date[1:2838], [X_original Prediction], label=["VWAP" "Prediction"], linewidth=3)
+acc = [abs(X_original[i]-Prediction[i])/X_original[i]*100 for i in 1:size(X_original)[1]]
+accuracy=100-mean(acc[300:end])
+io = open("out/Output_size_$output_size.txt", "w");
+write(io, string(accuracy));
+close(io);

@@ -1,6 +1,6 @@
 using Flux, Plots, Statistics, MLDatasets, Images, TimeSeries, CSV, DataFrames
 
-HL_size = 32;
+HL_size = parse(Int, ARGS[1]);
 
 data = CSV.read("BAJAJFINSV.csv", DataFrame)
 vwap = Float32.(data.VWAP)
@@ -31,5 +31,10 @@ end
 
 # Reshape result from Flux data format to Julia standard
 Prediction = [model(x)[1] for x ∈ X]
+acc = [abs(X_original[i]-Prediction[i])/X_original[i]*100 for i in 1:size(X_original)[1]]
+accuracy=100-mean(acc[300:end])
+io = open("out/HL_size_$HL_size.txt", "w");
+write(io, string(accuracy));
+close(io);
 
-plot(data.Date[1:2838], [X_original Prediction], label=["VWAP" "Prediction"], linewidth=3)
+# plot(data.Date[1:2838], [X_original Prediction], label=["VWAP" "Prediction"], linewidth=3)
